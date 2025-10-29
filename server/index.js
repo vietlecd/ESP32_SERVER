@@ -21,12 +21,13 @@ app.use(express.static(path.join(__dirname, '../public')));
 const sensorRoutes = require('./routes/sensor')(db, io);
 const deviceRoutes = require('./routes/device')(db);
 const configRoutes = require('./routes/config')(db, io);
-const mockRoutes = require('./routes/mock')(db, io);
+// Mock routes (disabled - can re-enable if needed for testing)
+// const mockRoutes = require('./routes/mock')(db, io);
 
 app.use('/api/sensor', sensorRoutes);
 app.use('/api/device', deviceRoutes);
 app.use('/api/config', configRoutes);
-app.use('/api/mock', mockRoutes);
+// app.use('/api/mock', mockRoutes);
 
 // WebSocket handling
 io.on('connection', (socket) => {

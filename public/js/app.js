@@ -83,9 +83,18 @@ function displayDevices(devices) {
             <div class="device-info">ID: ${device.deviceId}</div>
             <div class="device-info">Firmware: ${device.firmware || 'N/A'}</div>
             <div class="device-info">Last seen: ${formatDate(device.lastSeen)}</div>
+            <button class="btn" style="background: #dc3545; color: white; margin-top: 10px; width: 100%;" 
+                    onclick="event.stopPropagation(); deleteDevice('${device.deviceId}')">
+                🗑️ Xóa thiết bị
+            </button>
         `;
         
-        card.addEventListener('click', () => selectDevice(device.deviceId));
+        card.addEventListener('click', (e) => {
+            // Don't select device when clicking delete button
+            if (e.target.tagName !== 'BUTTON') {
+                selectDevice(device.deviceId);
+            }
+        });
         devicesList.appendChild(card);
     });
 }
@@ -303,138 +312,34 @@ function formatDate(dateString) {
     return date.toLocaleString('vi-VN');
 }
 
-// ========================================
-// Mock Data Functions
-// ========================================
-
-let autoGenerateInterval = null;
-
-async function seedMockData() {
-    try {
-        updateMockStatus('Đang tạo mock data...');
-        
-        const response = await fetch('/api/mock/seed', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                numDevices: 2,
-                numDataPoints: 30
-            })
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            updateMockStatus(`✅ Đã tạo ${data.devicesCreated} thiết bị và ${data.dataPointsCreated} điểm dữ liệu!`);
-            refreshDevices();
-        } else {
-            updateMockStatus('❌ Lỗi khi tạo mock data');
-        }
-    } catch (error) {
-        console.error('Error seeding mock data:', error);
-        updateMockStatus('❌ Lỗi kết nối đến server');
-    }
-}
-
-async function generateMockData() {
-    try {
-        updateMockStatus('Đang generate dữ liệu...');
-        
-        const response = await fetch('/api/mock/generate', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            updateMockStatus('✅ Đã generate dữ liệu mới!');
-            refreshDevices();
-            
-            // Nếu đang xem device, refresh data
-            if (currentDeviceId) {
-                loadSensorData(currentDeviceId);
-            }
-        } else {
-            updateMockStatus('❌ Lỗi khi generate dữ liệu');
-        }
-    } catch (error) {
-        console.error('Error generating mock data:', error);
-        updateMockStatus('❌ Lỗi kết nối đến server');
-    }
-}
-
-async function clearMockData() {
-    if (!confirm('⚠️ Bạn có chắc muốn xóa TẤT CẢ dữ liệu không?')) {
+async function deleteDevice(deviceId) {
+    if (!confirm(`⚠️ Bạn có chắc muốn xóa thiết bị "${deviceId}"?\n\nTất cả dữ liệu cảm biến của thiết bị này sẽ bị xóa!`)) {
         return;
     }
     
     try {
-        const response = await fetch('/api/mock/clear', {
+        const response = await fetch(`/api/device/${deviceId}`, {
             method: 'DELETE'
         });
         
         const data = await response.json();
         
         if (data.success) {
-            updateMockStatus('🗑️ Đã xóa tất cả dữ liệu');
+            alert(`✅ Đã xóa thiết bị ${deviceId}`);
             refreshDevices();
             
-            // Clear current device display
-            document.getElementById('sensorSection').style.display = 'none';
-            document.getElementById('configSection').style.display = 'none';
-            currentDeviceId = null;
+            // Clear current device display if deleted device was selected
+            if (currentDeviceId === deviceId) {
+                document.getElementById('sensorSection').style.display = 'none';
+                document.getElementById('configSection').style.display = 'none';
+                currentDeviceId = null;
+            }
         } else {
-            updateMockStatus('❌ Lỗi khi xóa dữ liệu');
+            alert('❌ Lỗi khi xóa thiết bị');
         }
     } catch (error) {
-        console.error('Error clearing data:', error);
-        updateMockStatus('❌ Lỗi kết nối đến server');
-    }
-}
-
-function startAutoGenerate() {
-    if (autoGenerateInterval) {
-        updateMockStatus('⚠️ Auto generate đã đang chạy');
-        return;
-    }
-    
-    updateMockStatus('▶️ Bắt đầu auto generate mỗi 5 giây...');
-    
-    // Generate ngay lập tức
-    generateMockData();
-    
-    // Setup interval
-    autoGenerateInterval = setInterval(() => {
-        generateMockData();
-    }, 5000);
-}
-
-function stopAutoGenerate() {
-    if (autoGenerateInterval) {
-        clearInterval(autoGenerateInterval);
-        autoGenerateInterval = null;
-        updateMockStatus('⏹️ Đã dừng auto generate');
-    } else {
-        updateMockStatus('⚠️ Auto generate không đang chạy');
-    }
-}
-
-function updateMockStatus(message) {
-    const statusDiv = document.getElementById('mockStatus');
-    if (statusDiv) {
-        statusDiv.textContent = message;
-        
-        // Auto clear sau 3 giây
-        setTimeout(() => {
-            if (statusDiv.textContent === message) {
-                statusDiv.textContent = '';
-            }
-        }, 5000);
+        console.error('Error deleting device:', error);
+        alert('❌ Lỗi kết nối đến server');
     }
 }
 
