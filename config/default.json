@@ -1,0 +1,19 @@
+{
+  "server": {
+    "port": 3000,
+    "host": "0.0.0.0"
+  },
+  "database": {
+    "type": "file",
+    "path": "./data/database.json"
+  },
+  "esp32": {
+    "defaultSendInterval": 5000,
+    "commandTimeout": 30000
+  },
+  "sensors": {
+    "historyLimit": 1000,
+    "cleanupInterval": 3600000
+  }
+}
+

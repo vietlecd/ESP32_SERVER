@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP32 IoT Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏠 ESP32 IoT Dashboard</h1>
+            <div class="server-status">
+                <span class="status-indicator online" id="serverStatus"></span>
+                <span id="serverStatusText">Đang kết nối...</span>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <!-- Mock Data Controls -->
+            <section class="mock-controls-section" style="background: #e8f4fd; border-left: 4px solid #2196F3;">
+                <h2>🧪 Mock Data Controls (Để test UI)</h2>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="btn btn-primary" onclick="seedMockData()">✨ Tạo dữ liệu giả</button>
+                    <button class="btn btn-primary" onclick="generateMockData()">🔄 Generate thêm data</button>
+                    <button class="btn" style="background: #dc3545; color: white;" onclick="clearMockData()">🗑️ Xóa tất cả</button>
+                    <button class="btn" style="background: #28a745; color: white;" onclick="startAutoGenerate()">▶️ Tự động generate (5s)</button>
+                    <button class="btn" style="background: #6c757d; color: white;" onclick="stopAutoGenerate()">⏹️ Dừng auto</button>
+                </div>
+                <div id="mockStatus" style="margin-top: 10px; font-size: 0.9em; color: #666;"></div>
+            </section>
+
+            <!-- Device List Section -->
+            <section class="devices-section">
+                <h2>📱 Danh sách thiết bị</h2>
+                <button class="btn btn-primary" onclick="refreshDevices()">🔄 Làm mới</button>
+                <div id="devicesList" class="devices-grid"></div>
+            </section>
+
+            <!-- Sensor Data Section -->
+            <section class="sensor-section" id="sensorSection" style="display: none;">
+                <h2 id="currentDeviceName">📊 Dữ liệu cảm biến</h2>
+                <div id="sensorData" class="sensor-grid"></div>
+                
+                <div class="chart-container">
+                    <canvas id="sensorChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Configuration Section -->
+            <section class="config-section" id="configSection" style="display: none;">
+                <h2>⚙️ Cấu hình thiết bị</h2>
+                <div class="config-form">
+                    <div class="form-group">
+                        <label>WiFi SSID:</label>
+                        <input type="text" id="wifiSSID" placeholder="Tên mạng WiFi">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>WiFi Password:</label>
+                        <input type="password" id="wifiPassword" placeholder="Mật khẩu WiFi">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Chu kỳ gửi dữ liệu (ms):</label>
+                        <input type="number" id="sendInterval" placeholder="5000" min="1000" step="1000">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>ID thiết bị:</label>
+                        <input type="text" id="deviceId" placeholder="ESP32_001">
+                    </div>
+                    
+                    <button class="btn btn-success" onclick="saveConfig()">💾 Lưu cấu hình</button>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
+
