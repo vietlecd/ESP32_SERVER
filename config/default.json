@@ -5,7 +5,7 @@
   },
   "database": {
     "type": "file",
-    "path": "./data/database.json"
+    "path": "../data/database.json"
   },
   "esp32": {
     "defaultSendInterval": 5000,

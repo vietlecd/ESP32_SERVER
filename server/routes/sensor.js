@@ -49,10 +49,19 @@ module.exports = (db, io) => {
       // Check for pending commands
       const commands = db.getPendingCommands(deviceId);
       if (commands.length > 0) {
+        console.log(`📤 Sending ${commands.length} pending command(s) to ${deviceId}`);
+        
+        // Trả về commands cho ESP32
         res.json({
           success: true,
           dataReceived: true,
           pendingCommands: commands.map(c => c.command)
+        });
+        
+        // XÓA commands sau khi đã gửi cho ESP32
+        commands.forEach(cmd => {
+          db.deletePendingCommand(cmd.id);
+          console.log(`✅ Deleted pending command ${cmd.id} for ${deviceId}`);
         });
       } else {
         res.json({ success: true, dataReceived: true });

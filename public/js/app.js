@@ -256,8 +256,10 @@ function getSensorTypeName(type) {
 
 async function loadDeviceConfig(deviceId) {
     try {
+        console.log('Loading config for device:', deviceId);
         const response = await fetch(`/api/config/${deviceId}`);
         const data = await response.json();
+        console.log('Config data received:', data);
         
         if (data.success) {
             const config = data.config;
@@ -265,6 +267,7 @@ async function loadDeviceConfig(deviceId) {
             document.getElementById('wifiPassword').value = config.wifi_password || '';
             document.getElementById('sendInterval').value = config.send_interval || 5000;
             document.getElementById('deviceId').value = config.device_id || deviceId;
+            console.log('Config loaded successfully');
         }
     } catch (error) {
         console.error('Error loading device config:', error);
@@ -272,6 +275,8 @@ async function loadDeviceConfig(deviceId) {
 }
 
 async function saveConfig() {
+    console.log('saveConfig called, currentDeviceId:', currentDeviceId);
+    
     if (!currentDeviceId) {
         alert('Vui lòng chọn thiết bị trước');
         return;
@@ -280,9 +285,11 @@ async function saveConfig() {
     const config = {
         wifi_ssid: document.getElementById('wifiSSID').value,
         wifi_password: document.getElementById('wifiPassword').value,
-        send_interval: document.getElementById('sendInterval').value,
+        send_interval: parseInt(document.getElementById('sendInterval').value),
         device_id: document.getElementById('deviceId').value
     };
+    
+    console.log('Saving config:', config);
     
     try {
         const response = await fetch(`/api/config/${currentDeviceId}`, {
@@ -294,15 +301,16 @@ async function saveConfig() {
         });
         
         const data = await response.json();
+        console.log('Save response:', data);
         
         if (data.success) {
-            alert('✅ Cấu hình đã được lưu và gửi đến thiết bị!');
+            alert('✅ Cấu hình đã được lưu và gửi đến thiết bị!\n\nESP32 sẽ nhận config trong lần gửi data tiếp theo.');
         } else {
-            alert('❌ Lỗi khi lưu cấu hình');
+            alert('❌ Lỗi khi lưu cấu hình: ' + (data.error || 'Unknown error'));
         }
     } catch (error) {
         console.error('Error saving config:', error);
-        alert('❌ Lỗi kết nối đến server');
+        alert('❌ Lỗi kết nối đến server: ' + error.message);
     }
 }
 

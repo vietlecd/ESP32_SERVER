@@ -155,6 +155,18 @@ class FileDatabase {
     }
     return null;
   }
+
+  deletePendingCommand(cmdId) {
+    const db = this.read();
+    const initialLength = db.pendingCommands.length;
+    db.pendingCommands = db.pendingCommands.filter(c => c.id !== cmdId);
+    
+    if (db.pendingCommands.length < initialLength) {
+      this.write(db);
+      return true;
+    }
+    return false;
+  }
 }
 
 module.exports = FileDatabase;
